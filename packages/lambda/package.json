@@ -1,0 +1,20 @@
+{
+  "name": "@claude-code-dashboard/lambda",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/handler.ts --bundle --platform=node --target=node22 --outfile=dist/handler.js --external:snowflake-sdk",
+    "typecheck": "tsc --noEmit",
+    "dev": "sam local invoke ClaudeCodeIngestFunction --event events/test.json"
+  },
+  "dependencies": {
+    "snowflake-sdk": "^2.3.4"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "@types/node": "^22.0.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.7.3"
+  }
+}

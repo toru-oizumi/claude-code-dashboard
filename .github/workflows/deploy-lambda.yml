@@ -1,0 +1,52 @@
+name: Deploy Lambda
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/lambda/**'
+      - '.github/workflows/deploy-lambda.yml'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - name: Build Lambda
+        working-directory: packages/lambda
+        run: pnpm build
+
+      - name: SAM Build
+        working-directory: packages/lambda
+        run: sam build
+
+      - name: SAM Deploy
+        working-directory: packages/lambda
+        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset

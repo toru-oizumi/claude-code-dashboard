@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Claude Code Activity Dashboard - Lambda Ingest Function
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+    Runtime: nodejs22.x
+    Architectures:
+      - arm64
+    Environment:
+      Variables:
+        SNOWFLAKE_ACCOUNT: !Sub '{{resolve:ssm:/claude-code-dashboard/snowflake/account}}'
+        SNOWFLAKE_USER: !Sub '{{resolve:ssm:/claude-code-dashboard/snowflake/user}}'
+        SNOWFLAKE_PASSWORD: !Sub '{{resolve:ssm:/claude-code-dashboard/snowflake/password}}'
+        SNOWFLAKE_DATABASE: !Sub '{{resolve:ssm:/claude-code-dashboard/snowflake/database}}'
+        SNOWFLAKE_WAREHOUSE: !Sub '{{resolve:ssm:/claude-code-dashboard/snowflake/warehouse}}'
+        API_KEY: !Sub '{{resolve:ssm:/claude-code-dashboard/api-key}}'
+
+Resources:
+  ClaudeCodeIngestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.handler
+      CodeUri: ./
+      Events:
+        PostEvent:
+          Type: HttpApi
+          Properties:
+            Path: /events
+            Method: POST
+            ApiId: !Ref HttpApi
+
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: $default
+      CorsConfiguration:
+        AllowOrigins:
+          - '*'
+        AllowMethods:
+          - POST
+        AllowHeaders:
+          - Content-Type
+          - x-api-key
+
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/events'
+  FunctionArn:
+    Description: Lambda Function ARN
+    Value: !GetAtt ClaudeCodeIngestFunction.Arn
