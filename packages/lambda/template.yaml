@@ -11,12 +11,12 @@ Globals:
       - arm64
     Environment:
       Variables:
-        SNOWFLAKE_ACCOUNT: !Sub '{{resolve:ssm:/claude-code-dashboard/snowflake/account}}'
-        SNOWFLAKE_USER: !Sub '{{resolve:ssm:/claude-code-dashboard/snowflake/user}}'
-        SNOWFLAKE_PASSWORD: !Sub '{{resolve:ssm:/claude-code-dashboard/snowflake/password}}'
-        SNOWFLAKE_DATABASE: !Sub '{{resolve:ssm:/claude-code-dashboard/snowflake/database}}'
-        SNOWFLAKE_WAREHOUSE: !Sub '{{resolve:ssm:/claude-code-dashboard/snowflake/warehouse}}'
-        API_KEY: !Sub '{{resolve:ssm:/claude-code-dashboard/api-key}}'
+        SNOWFLAKE_ACCOUNT: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:snowflake_account}}'
+        SNOWFLAKE_USER: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:snowflake_user}}'
+        SNOWFLAKE_PASSWORD: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:snowflake_password}}'
+        SNOWFLAKE_DATABASE: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:snowflake_database}}'
+        SNOWFLAKE_WAREHOUSE: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:snowflake_warehouse}}'
+        API_KEY: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:api_key}}'
 
 Resources:
   ClaudeCodeIngestFunction:

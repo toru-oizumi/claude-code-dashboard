@@ -1,3 +1,14 @@
+# Secrets Manager初期登録（初回デプロイ前に実行）:
+# aws secretsmanager create-secret --name claude-code-dashboard \
+#   --secret-string '{
+#     "snowflake_account": "xxxxx.ap-northeast-1",
+#     "snowflake_user": "CLAUDE_HOOK_USER",
+#     "snowflake_password": "your-password",
+#     "snowflake_database": "YOUR_DB",
+#     "snowflake_warehouse": "COMPUTE_WH",
+#     "api_key": "your-random-api-key"
+#   }'
+
 version = 0.1
 
 [default]
