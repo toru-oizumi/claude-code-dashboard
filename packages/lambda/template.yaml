@@ -16,6 +16,7 @@ Globals:
         SNOWFLAKE_PASSWORD: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:snowflake_password}}'
         SNOWFLAKE_DATABASE: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:snowflake_database}}'
         SNOWFLAKE_WAREHOUSE: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:snowflake_warehouse}}'
+        SNOWFLAKE_SCHEMA: 'CLAUDE_CODE'
         API_KEY: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:api_key}}'
 
 Resources:

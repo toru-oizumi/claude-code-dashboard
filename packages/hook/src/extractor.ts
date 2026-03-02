@@ -10,7 +10,7 @@ function getUserEmail(): string {
       .toString()
       .trim();
   } catch {
-    return os.userInfo().username;
+    return `${os.userInfo().username}@${os.hostname()}`;
   }
 }
 
@@ -47,6 +47,7 @@ function extractEventType(toolName: string): { type: EventType; name: string } {
   if (toolName === 'Skill') return { type: 'skill', name: '' };
   if (toolName === 'Agent') return { type: 'sub_agent', name: '' };
   if (toolName.startsWith('mcp__')) return { type: 'mcp', name: toolName };
+  // TODO: slash_command はフックの別イベント種別（PreToolUse 以外）で検出する必要がある
   return { type: 'message', name: '' };
 }
 

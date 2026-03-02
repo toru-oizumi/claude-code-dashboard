@@ -13,7 +13,7 @@ function getConnection(): Promise<snowflake.Connection> {
       username: env.SNOWFLAKE_USER,
       password: env.SNOWFLAKE_PASSWORD,
       database: env.SNOWFLAKE_DATABASE,
-      schema: 'CLAUDE_CODE',
+      schema: env.SNOWFLAKE_SCHEMA,
       warehouse: env.SNOWFLAKE_WAREHOUSE,
     });
 

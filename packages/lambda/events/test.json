@@ -1,0 +1,18 @@
+{
+  "version": "2.0",
+  "routeKey": "POST /events",
+  "rawPath": "/events",
+  "rawQueryString": "",
+  "headers": {
+    "content-type": "application/json",
+    "x-api-key": "test-api-key"
+  },
+  "requestContext": {
+    "http": {
+      "method": "POST",
+      "path": "/events"
+    }
+  },
+  "body": "{\"session_id\":\"test-session-123\",\"user_email\":\"test@example.com\",\"cwd\":\"/home/user/project\",\"workspace\":\"owner/repo\",\"event_type\":\"skill\",\"event_name\":\"commit\",\"occurred_at\":\"2026-03-03T00:00:00.000Z\"}",
+  "isBase64Encoded": false
+}

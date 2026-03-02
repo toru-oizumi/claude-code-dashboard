@@ -20,6 +20,9 @@ export const env = {
   get SNOWFLAKE_WAREHOUSE() {
     return requireEnv('SNOWFLAKE_WAREHOUSE');
   },
+  get SNOWFLAKE_SCHEMA() {
+    return requireEnv('SNOWFLAKE_SCHEMA');
+  },
   get API_KEY() {
     return requireEnv('API_KEY');
   },

@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { env } from './env.js';
 import { insertEvent } from './snowflake.js';
-import { validate } from './validator.js';
+import { ValidationError, validate } from './validator.js';
 
 function json(statusCode: number, body: Record<string, unknown>): APIGatewayProxyResultV2 {
   return { statusCode, body: JSON.stringify(body) };
@@ -14,16 +14,20 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
     return json(401, { error: 'Unauthorized' });
   }
 
+  let body: unknown;
   try {
-    const body = JSON.parse(event.body ?? '{}');
+    body = JSON.parse(event.body ?? '{}');
+  } catch {
+    return json(400, { error: 'Invalid JSON body' });
+  }
+
+  try {
     const claudeEvent = validate(body);
     await insertEvent(claudeEvent);
     return json(200, { ok: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     console.error('Error:', message, err);
-
-    const isValidationError = message.includes('required') || message.includes('Invalid');
-    return json(isValidationError ? 400 : 500, { error: message });
+    return json(err instanceof ValidationError ? 400 : 500, { error: message });
   }
 };
