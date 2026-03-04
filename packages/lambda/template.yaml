@@ -13,7 +13,7 @@ Globals:
       Variables:
         SNOWFLAKE_ACCOUNT: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:snowflake_account}}'
         SNOWFLAKE_USER: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:snowflake_user}}'
-        SNOWFLAKE_PASSWORD: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:snowflake_password}}'
+        SNOWFLAKE_PRIVATE_KEY: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:snowflake_private_key}}'
         SNOWFLAKE_DATABASE: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:snowflake_database}}'
         SNOWFLAKE_WAREHOUSE: '{{resolve:secretsmanager:claude-code-dashboard:SecretString:snowflake_warehouse}}'
         SNOWFLAKE_SCHEMA: 'CLAUDE_CODE'

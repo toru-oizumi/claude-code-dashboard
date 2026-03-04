@@ -1,6 +1,20 @@
+import { readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
 import snowflake from 'snowflake-sdk';
 import { env } from './env.js';
 import type { ClaudeCodeEvent } from './types.js';
+
+function getPrivateKey(): string {
+  // Lambda: Secrets Manager から PEM 文字列（\n がエスケープされている場合を考慮）
+  const keyContent = process.env.SNOWFLAKE_PRIVATE_KEY;
+  if (keyContent) return keyContent.replace(/\\n/g, '\n');
+
+  // ローカル: ファイルパス
+  const keyPath = process.env.SNOWFLAKE_PRIVATE_KEY_PATH;
+  if (keyPath) return readFileSync(keyPath.replace('~', homedir()), 'utf-8');
+
+  throw new Error('SNOWFLAKE_PRIVATE_KEY or SNOWFLAKE_PRIVATE_KEY_PATH is required');
+}
 
 let connectionPromise: Promise<snowflake.Connection> | null = null;
 
@@ -11,7 +25,8 @@ function getConnection(): Promise<snowflake.Connection> {
     const conn = snowflake.createConnection({
       account: env.SNOWFLAKE_ACCOUNT,
       username: env.SNOWFLAKE_USER,
-      password: env.SNOWFLAKE_PASSWORD,
+      authenticator: 'SNOWFLAKE_JWT',
+      privateKey: getPrivateKey(),
       database: env.SNOWFLAKE_DATABASE,
       schema: env.SNOWFLAKE_SCHEMA,
       warehouse: env.SNOWFLAKE_WAREHOUSE,
