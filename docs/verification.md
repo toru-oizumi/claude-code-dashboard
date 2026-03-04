@@ -53,17 +53,18 @@ SELECT * FROM MODEL_PRICING LIMIT 5;
 
 ## Phase 2: AWS Secrets Manager にシークレット登録
 
-### Step 2-1. シークレットを作成
+シークレットは2つ作成します。
+
+### Step 2-1. キー/値シークレット（接続情報 + API キー）
 
 ```bash
 aws secretsmanager create-secret \
   --name claude-code-dashboard \
-  --region ap-northeast-1 \
+  --region us-west-2 \
   --secret-string '{
-    "snowflake_account": "xxxxx.ap-northeast-1",
+    "snowflake_account": "NVQTVBO-JSB24064",
     "snowflake_user": "CLAUDE_HOOK_USER",
-    "snowflake_password": "your-password",
-    "snowflake_database": "ANALYTICS",
+    "snowflake_database": "YOUR_DB",
     "snowflake_warehouse": "COMPUTE_WH",
     "api_key": "test-api-key-12345"
   }'
@@ -71,17 +72,34 @@ aws secretsmanager create-secret \
 
 > **注意:** `api_key` は後の手順で使います。控えておいてください。
 
-### Step 2-2. 登録内容を確認
+### Step 2-2. プレーンテキストシークレット（RSA 秘密鍵）
+
+`snowflake/00_user_setup.sql` の Step 1 でキーペアを生成済みであることが前提です。
 
 ```bash
-aws secretsmanager get-secret-value \
-  --secret-id claude-code-dashboard \
-  --region ap-northeast-1 \
-  --query SecretString \
-  --output text | jq .
+aws secretsmanager create-secret \
+  --name claude-code-dashboard/private-key \
+  --region us-west-2 \
+  --secret-string file://rsa_key.p8
 ```
 
-全キーが表示されれば OK。
+### Step 2-3. 登録内容を確認
+
+```bash
+# キー/値シークレット
+aws secretsmanager get-secret-value \
+  --secret-id claude-code-dashboard \
+  --region us-west-2 \
+  --query SecretString \
+  --output text | jq .
+
+# 秘密鍵（先頭行が -----BEGIN PRIVATE KEY----- なら OK）
+aws secretsmanager get-secret-value \
+  --secret-id claude-code-dashboard/private-key \
+  --region us-west-2 \
+  --query SecretString \
+  --output text | head -1
+```
 
 ---
 
@@ -113,11 +131,11 @@ sam deploy
 ```bash
 aws cloudformation describe-stacks \
   --stack-name claude-code-dashboard \
-  --region ap-northeast-1 \
+  --region us-west-2 \
   --query 'Stacks[0].Outputs[?OutputKey==`ApiEndpoint`].OutputValue' \
   --output text
 
-# 出力例: https://abc123def.execute-api.ap-northeast-1.amazonaws.com/events
+# 出力例: https://abc123def.execute-api.us-west-2.amazonaws.com/events
 export ENDPOINT="上記のURL"
 ```
 
@@ -279,7 +297,7 @@ WHERE session_id = 'hook-verify-001';
 `~/.zshrc`（または `~/.bashrc`）に追記します。
 
 ```bash
-export CLAUDE_CODE_HOOK_ENDPOINT="https://abc123def.execute-api.ap-northeast-1.amazonaws.com/events"
+export CLAUDE_CODE_HOOK_ENDPOINT="https://abc123def.execute-api.us-west-2.amazonaws.com/events"
 export CLAUDE_CODE_HOOK_API_KEY="test-api-key-12345"
 ```
 
@@ -349,7 +367,7 @@ Lambda のログを確認します。
 ```bash
 aws logs tail /aws/lambda/claude-code-dashboard-ClaudeCodeIngestFunction \
   --since 10m \
-  --region ap-northeast-1
+  --region us-west-2
 ```
 
 よくある原因：

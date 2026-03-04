@@ -94,17 +94,30 @@ sed 's/<DB>/MY_DATABASE/g' snowflake/04_dynamic_tables.sql | snowsql
 
 ### 3. AWS Secrets Manager にシークレットを登録
 
+シークレットは用途別に2つ作成します。
+
+**[1] キー/値シークレット** — Snowflake 接続情報 + API キー
+
 ```bash
 aws secretsmanager create-secret \
   --name claude-code-dashboard \
+  --region us-west-2 \
   --secret-string '{
-    "snowflake_account": "xxxxx.ap-northeast-1",
+    "snowflake_account": "NVQTVBO-JSB24064",
     "snowflake_user": "CLAUDE_HOOK_USER",
-    "snowflake_password": "your-password",
     "snowflake_database": "YOUR_DB",
     "snowflake_warehouse": "COMPUTE_WH",
     "api_key": "your-random-api-key"
   }'
+```
+
+**[2] プレーンテキストシークレット** — RSA 秘密鍵（PEM ファイルをそのまま格納）
+
+```bash
+aws secretsmanager create-secret \
+  --name claude-code-dashboard/private-key \
+  --region us-west-2 \
+  --secret-string file://rsa_key.p8
 ```
 
 `api_key` は任意のランダム文字列です。フック側の `CLAUDE_CODE_HOOK_API_KEY` と一致させてください。
@@ -148,7 +161,7 @@ sam deploy
 環境変数を設定します（`~/.zshrc` や `~/.bashrc` に追記）：
 
 ```bash
-export CLAUDE_CODE_HOOK_ENDPOINT="https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/events"
+export CLAUDE_CODE_HOOK_ENDPOINT="https://xxxxxxxxxx.execute-api.us-west-2.amazonaws.com/events"
 export CLAUDE_CODE_HOOK_API_KEY="your-random-api-key"
 ```
 
@@ -214,4 +227,4 @@ pnpm biome format --write .
 | Secrets Manager | Snowflake 認証情報 + API キー |
 | IAM | OIDC による GitHub Actions からのロール引き受け |
 
-デプロイは `ap-northeast-1`（東京）固定です。変更する場合は `samconfig.toml` の `region` を修正してください。
+デプロイは `us-west-2`（オレゴン）固定です。変更する場合は `samconfig.toml` の `region` を修正してください。
